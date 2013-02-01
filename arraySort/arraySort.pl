@@ -45,7 +45,10 @@ sub arraySort {
 		ref($$b[$n]) ne ''
 	) {
 		return(ref($$a[$n]) eq ''?1:-1);
-	} elsif ( $$a[$n].$$b[$n] =~ /^\d+$/ ) {
+	} elsif (
+		$$a[$n] =~ /^\d+$/ and
+		$$b[$n] =~ /^\d+$/
+	) {
 		return($$a[$n] <=> $$b[$n]);
 	} else {
 		return($$a[$n] cmp $$b[$n]);
