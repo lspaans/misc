@@ -3,54 +3,71 @@
 use strict;
 use warnings;
 
+use Data::Dumper;
+
 #-----------------------------------------------------------------------------#
 # Function      : voodooSort(;@)
 # Dependencies  :
 # Purpose       : A sorting algorithm for sorting 2d arrays in a  non-regular
 #                 way by indicating the column order to use and the type of
-#                 comparison (numerical or lexicographical) that should be used
-#                 while sorting.
-#
-# In  : [1] An optional array containing sort indicators. Sort indicators
-#           instruct the sorting algorithm in which order to sort the columns
-#           of the referenced arrays as contained within the array that is
-#           being sorted.
-#           Sort indicator syntax: '<sort type>:<col.nr>'.
-#           '<sort type>' = 'n' (numerical) or 's' (lexicographical).
-#           '<col.nr>' = positive integer value indicating the array column
-#           (0=col 1, 1=col 2 etc.)
+#                 comparison (numerical, lexicographical or by a custom
+#                 function) that should be used while sorting.
 #
 # Out : [1]
 #
 #-----------------------------------------------------------------------------#
 
-sub voodooSort(;@) {
-  my (@cData,@c)   = @_;
-  our ($a,$b);
-  for(@cData) {
-      if (/^([sn]):(\d+)$/g) {
-          push @c,[$1,$2];
-      } else {
-          return(0);
-      }
-  }
-  return(
-    (
-      grep {$_ ne '0'} map {
-      (
-          defined $$a[$$_[1]] and
-          defined $$b[$$_[1]]
-      ) ? (
-          ( $$_[0] eq 's' or $$_[0] ne 'n' ) ?
-          $$a[$$_[1]] cmp $$b[$$_[1]] : 
-          $$a[$$_[1]] <=> $$b[$$_[1]]
-      ) : defined $$a[$$_[1]] ?  1 : -1
-    } @c
-    )[0]||0
-  );
+sub funkyCompare($$;@) {
+    my ($a,$b,@params)  = @_;
+    return(1-(($a+$b)%3));
 }
 
-my @zut     = (
+sub voodooSort(;@) {
+    my (@instr)   = @_;
+    our ($a,$b);
+    for(@instr) {
+        if (
+            (
+                exists $_->{'t'} and
+                $_->{'t'} !~ /^[snf]$/
+            ) or
+            not(exists $_->{'c'}) or (
+                $_->{'t'} eq 'f' and (
+                    not(exists $_->{'f'}) or
+                    ref($_->{'f'}) ne 'CODE'
+                )
+            )
+        ) {
+            return(0)
+        } 
+    }
+    return(
+        (
+            grep {$_ ne '0'} map {
+                (
+                    defined $$a[$_->{'c'}] and
+                    defined $$b[$_->{'c'}]
+                ) ? (
+                    (
+                        not(exists $_->{'t'}) or
+                        $_->{'t'} eq 's'
+                    ) ? $$a[$_->{'c'}] cmp $$b[$_->{'c'}] :
+                    ( $_->{'t'} eq 'n' ) ?
+                    $$a[$_->{'c'}] <=> $$b[$_->{'c'}] :
+                    ( $_->{'t'} eq 'f' ) ?
+                    &{$_->{'f'}}(
+                        $$a[$_->{'c'}],
+                        $$b[$_->{'c'}],
+                        @{$_->{'p'}}
+                    ) :
+                    0
+                ) : defined $$a[$_->{'c'}] ?  1 : -1
+            } @instr
+        )[0]||0
+    );
+}
+
+my @def_zut     = (
         [ 'd1', 7,  'c1' ],
         [ 'd3', -5.5, 'c7' ],
         [ 'd2', 2,  'a3' ],
@@ -61,24 +78,25 @@ my @zut     = (
         [ 'd3', 0, 'd0' ],
         [ 'd3', 1000, 'd8' ]
 );
+my @zut;
 
-@zut    = sort {voodooSort('s:0','n:1')} @zut;
+my @sortInstructions    = ();
 
-for my $zut_entry_ref (@zut) {
-        print "".(join ",",@$zut_entry_ref)."\n";
-}
+@sortInstructions    = ({'t'=>'s','c'=>0},{'t'=>'n','c'=>1});
+@zut    = sort {voodooSort(@sortInstructions)} @def_zut;
+print "".(join ",",@$_)."\n" for @zut;
 print "\n";
 
-@zut    = sort {voodooSort('n:1','s:0')} @zut;
-
-for my $zut_entry_ref (@zut) {
-        print "".(join ",",@$zut_entry_ref)."\n";
-}
+@sortInstructions    = ({'t'=>'n','c'=>1},{'t'=>'s','c'=>0});
+@zut    = sort {voodooSort(@sortInstructions)} @def_zut;
+print "".(join ",",@$_)."\n" for @zut;
 print "\n";
 
-@zut    = sort voodooSort @zut;
+@zut    = sort voodooSort @def_zut;
+print "".(join ",",@$_)."\n" for @zut;
+print "\n";
 
-for my $zut_entry_ref (@zut) {
-        print "".(join ",",@$zut_entry_ref)."\n";
-}
+@sortInstructions    = ({'t'=>'f','c'=>1, 'f'=>\&funkyCompare,'p'=>[1,3,2]});
+@zut    = sort {voodooSort(@sortInstructions)} @def_zut;
+print "".(join ",",@$_)."\n" for @zut;
 print "\n";
