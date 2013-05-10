@@ -98,7 +98,7 @@ sub p_print($$$$) {
 				map sprintf(
 					(
 						$typ eq 'hex' ?
-						"%x" :
+						"%2.2x" :
 						"%d"
 					),
 					$_
