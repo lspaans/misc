@@ -41,7 +41,7 @@ print "( @d ) => ( @r )\n";
 
 print "( @d ) => ( @r )\n";
 
-@d = qw( A A A B A A A );
+@d = qw( A A A A A A B );
 @r = sortDistributed(@d);
 
 print "( @d ) => ( @r )\n";
