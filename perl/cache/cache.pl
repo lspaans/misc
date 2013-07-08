@@ -221,7 +221,7 @@ my @caches      = ();
 my @out         = ();
 
 for my $n (0..255) {
-    if ( $n eq '5' ) {
+    if ( $n eq '5' or $n eq '55' ) {
         push @caches,
             Cache->new($lines_pre,$lines_post,$cache_adm->getCache());
     }
