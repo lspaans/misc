@@ -94,9 +94,11 @@ my %meta_data_cache             = (
 sub new {
     my (
         $class,
-        $lines_pre,     $lines_post
+        $lines_pre,     $lines_post,
+        $pre_cache_ref
     )	= @_;
     my $self                        = {
+        '_n'                    => 0,
         '_n_lines_pre_match'    => undef,
         '_n_lines_post_match'   => undef,
         '_line_cache'           => []
@@ -105,6 +107,17 @@ sub new {
     $self->init(
         $lines_pre,     $lines_post
     );
+    if (
+        defined $pre_cache_ref and
+        ref($pre_cache_ref) eq 'ARRAY'
+    ) {
+        for my $n ((-1*$lines_pre)..-1) {
+            if (defined $pre_cache_ref->[$n]) {
+                $self->add($pre_cache_ref->[$n]);
+            }
+        }
+        $self->{'_n'} = $lines_pre;
+    }
     $self;
 }
 
@@ -134,7 +147,21 @@ sub isValid() {
 
 sub getCache() {
     my ($self)                          = @_;
-    return(@{$self->{'_line_cache'}});
+    return(\@{$self->{'_line_cache'}});
+}
+
+sub isFull() {
+    my ($self)                          = @_;
+    if (
+        $self->{'_n'} >= (
+            $self->{'_n_lines_pre_match'} +
+            $self->{'_n_lines_post_match'} +
+            1
+        )
+    ) {
+        return(1);
+    }
+    return(0);
 }
 
 sub setLinesPre() {
@@ -163,6 +190,7 @@ sub init {
 sub add() {
     my ($self,$value)                   = @_;
     push @{$self->{'_line_cache'}}, $value;
+    $self->{'_n'}++;
     while(
         $#{$self->{'_line_cache'}} >
         (
@@ -171,20 +199,8 @@ sub add() {
         )
     ) {
         shift @{$self->{'_line_cache'}};
+        $self->{'_n'}--;
     }
-}
-
-sub matches() {
-    my ($self,$match)                   = @_;
-    if (
-        defined $self->{'_line_cache'}[$self->{'_n_lines_pre_match'}] and
-        defined $match and
-        $self->{'_line_cache'}[$self->{'_n_lines_pre_match'}] =~
-            /$match/
-    ) {
-        return(1);
-    }
-    return(0);
 }
 
 1;
@@ -196,14 +212,32 @@ use 5.010;
 use strict;
 use warnings;
 
-my $cache   = Cache->new(3,2);
+use Data::Dumper;
+
+my $lines_pre   = 3;
+my $lines_post  = 2;
+my $cache_adm   = Cache->new($lines_pre,$lines_post);
+my @caches      = ();
+my @out         = ();
 
 for my $n (0..255) {
-    $cache->add($n);
-    if ($cache->matches('^67$')) {
-        my @cached_lines    = $cache->getCache();
-        print "\@cached_lines = ( @cached_lines )\n";
+    if ( $n eq '5' ) {
+        push @caches,
+            Cache->new($lines_pre,$lines_post,$cache_adm->getCache());
     }
+    $cache_adm->add($n);
+    for my $cache (@caches) {
+        $cache->add($n);
+        if ($cache->isFull()) {
+            push @out, $cache->getCache();
+        }
+    }
+    @caches = grep {not($_->isFull())} @caches;
 }
+for my $cache (@caches) {
+    push @out, $cache->getCache();
+}
+
+print Dumper @out;
 
 1;
