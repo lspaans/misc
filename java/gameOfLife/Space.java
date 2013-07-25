@@ -184,9 +184,9 @@ public class Space {
         for(int y=0;y<_Height;y++) {
             for(int x=0;x<_Width;x++) {
                 if ( _Cells[x][y].isAlive() ) {
-                    Out += "X";
+                    Out += "O";
                 } else {
-                    Out += " ";
+                    Out += ".";
                 }
             }
             Out += "\n";

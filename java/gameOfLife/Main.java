@@ -19,7 +19,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Game g                   = new Game(100,50,150);
+        Game g                   = new Game(75,40,100);
 
         while(
             g.hasLiveCells() &&
@@ -33,7 +33,7 @@ public class Main {
             g.displaySpace();
             g.nextGenerationSpace();
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
             }
         }
