@@ -7,18 +7,13 @@ import java.util.Vector;
 
 import nl.gridpoint.test.gameoflife.Cell;
 
+//public class Space implements Cloneable {
 public class Space {
-
-    private Integer                 _Generation = 1;
 
     private Integer                 _Width;
     private Integer                 _Height;
 
     private Cell[][]                _Cells;
-
-    private HashMap<String,String>  _MD5Cache   = new HashMap<String,String>();
-
-    private Boolean                 _Loop       = Boolean.FALSE;
 
     private static Integer          _DefWidth   = 100;
     private static Integer          _DefHeight  = 100;
@@ -72,7 +67,7 @@ public class Space {
         this._setHeight(Height);
         for(int y=0;y<Height;y++) {
             for(int x=0;x<Width;x++) {
-                _Cells[x][y]    = new Cell(x,y);
+                _Cells[x][y]    = new Cell();
             }
         }
     }
@@ -85,10 +80,6 @@ public class Space {
         } else {
             return(null);
         }
-    }
-
-    public Integer getGeneration() {
-        return(_Generation);
     }
 
     public Integer getWidth() {
@@ -143,6 +134,7 @@ public class Space {
     public Integer getNumberOfLivingNeighbourCells(Integer x,Integer y) {
         Vector<Cell> cells      = this.getNeighbourCells(x,y);
         Iterator<Cell> i        = cells.iterator();
+        Cell c                  = _Cells[x][y];
         Integer  n              = new Integer(0);
         while(i.hasNext()) {
             if (i.next().isAlive()) {
@@ -150,33 +142,6 @@ public class Space {
             }
         }
         return(n);
-    }
-
-    public void nextGeneration() {
-        Cell[][]  NewCells  = _Cells;
-        String    MD5       = this.getMD5();
-        if (_MD5Cache.containsKey(MD5)) {
-            _Loop    = Boolean.TRUE;
-        } else {
-            _MD5Cache.put(this.getMD5(),this.toString());
-        }
-        for(int y=0;y<_Height;y++) {
-            for(int x=0;x<_Width;x++) {
-                Integer n = this.getNumberOfLivingNeighbourCells(x,y);
-
-                if ( NewCells[x][y].isAlive() ) {
-                    if ( n < 2 || n > 3 ) {
-                        NewCells[x][y].doKill();
-                    }
-                } else {
-                    if ( n == 3 ) {
-                        NewCells[x][y].doLive();
-                    }
-                }
-            }
-        }
-        _Generation++;
-        _Cells      = NewCells;
     }
 
     public String toString() {
@@ -209,8 +174,16 @@ public class Space {
         return(null);
     }
 
-    public Boolean isLooping() {
-        return(_Loop);
+    public Space getClone() { 
+        Space Clone = new Space(_Width,_Height);
+        for(int y=0;y<_Height;y++) {
+            for(int x=0;x<_Width;x++) {
+                if (this.getCell(x,y).isAlive()) {
+                    Clone.getCell(x,y).doLive();
+                }
+            }
+        }
+        return(Clone);
     }
 
     public void display() {
