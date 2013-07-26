@@ -20,6 +20,7 @@ public class Main {
     public static void main(String[] args) {
 
         Game g                   = new Game(75,40,100);
+        //g.doLiveCells(100);
 
         while(
             g.hasLiveCells() &&

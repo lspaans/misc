@@ -13,24 +13,22 @@ public class Game {
 
     private static Integer      _DefSpaceWidth      = 50;
     private static Integer      _DefSpaceHeight     = 50;
-    private static Integer      _DefNumLiveCells    = 10;
 
     public Game() {
         this(
             _DefSpaceWidth,
-            _DefSpaceHeight,
-            _DefNumLiveCells
+            _DefSpaceHeight
         );
     }
 
     public Game(
         Integer Width,
-        Integer Height 
+        Integer Height
     ) {
-        this(
+        this._initGame(
             Width,
             Height,
-            _DefNumLiveCells
+            0
         );
     }
 
@@ -46,9 +44,10 @@ public class Game {
         );
     }
 
-    private void _doLiveCells(Integer Num) {
+    public void doLiveCells(Integer Num) {
         Integer Width           = _Space.getWidth();
         Integer Height          = _Space.getHeight();
+        _NumLiveCells           = Num;
         Random randomGenerator  = new Random();
         int[][] posCache        = new int[Width][Height];
 
@@ -69,9 +68,10 @@ public class Game {
         Integer Height,
         Integer NumLiveCells
     ) {
-        _NumLiveCells   = NumLiveCells;
         _Space          = new Space(Width,Height);
-        this._doLiveCells(NumLiveCells);
+        if ( NumLiveCells > 0 ) {
+            this.doLiveCells(NumLiveCells);
+        }
     }
 
     public Integer getGenerationSpace() {
