@@ -218,6 +218,99 @@ public class Game {
             add(new Point(1,2)); add(new Point(2,2));
         }};
 
+    private static ArrayList<Point> _ObjLoafer            =
+        new ArrayList<Point>(){{
+            add(new Point(1,0)); add(new Point(2,0));
+            add(new Point(5,0)); add(new Point(7,0));
+            add(new Point(8,0)); add(new Point(0,1));
+            add(new Point(3,1)); add(new Point(6,1));
+            add(new Point(7,1)); add(new Point(1,2));
+            add(new Point(3,2)); add(new Point(2,3));
+            add(new Point(8,4)); add(new Point(6,5));
+            add(new Point(7,5)); add(new Point(8,5));
+            add(new Point(5,6)); add(new Point(6,7));
+            add(new Point(7,8)); add(new Point(8,8));
+        }};
+
+    private static ArrayList<Point> _ObjSidecar           =
+        new ArrayList<Point>(){{
+            add(new Point(1,0)); add(new Point(2,0));
+            add(new Point(0,1)); add(new Point(1,1));
+            add(new Point(3,1)); add(new Point(4,1));
+            add(new Point(7,1)); add(new Point(8,1));
+            add(new Point(1,2)); add(new Point(2,2));
+            add(new Point(3,2)); add(new Point(4,2));
+            add(new Point(6,2)); add(new Point(2,3));
+            add(new Point(3,3)); add(new Point(2,6));
+            add(new Point(3,6)); add(new Point(1,7));
+            add(new Point(2,7)); add(new Point(4,7));
+            add(new Point(5,7)); add(new Point(6,7));
+            add(new Point(7,7)); add(new Point(2,8));
+            add(new Point(3,8)); add(new Point(4,8));
+            add(new Point(5,8)); add(new Point(6,8));
+            add(new Point(7,8)); add(new Point(3,9));
+            add(new Point(4,9)); add(new Point(5,9));
+            add(new Point(6,9));
+
+        }};
+
+    private static ArrayList<Point> _ObjSpider            =
+        new ArrayList<Point>(){{
+            add(new Point(9,0)); add(new Point(17,0));
+            add(new Point(3,1)); add(new Point(4,1));
+            add(new Point(6,1)); add(new Point(8,1));
+            add(new Point(10,1)); add(new Point(11,1));
+            add(new Point(15,1)); add(new Point(16,1));
+            add(new Point(18,1)); add(new Point(20,1));
+            add(new Point(22,1)); add(new Point(23,1));
+            add(new Point(0,2)); add(new Point(1,2));
+            add(new Point(2,2)); add(new Point(4,2));
+            add(new Point(6,2)); add(new Point(7,2));
+            add(new Point(8,2)); add(new Point(18,2));
+            add(new Point(19,2)); add(new Point(20,2));
+            add(new Point(22,2)); add(new Point(24,2));
+            add(new Point(25,2)); add(new Point(26,2));
+            add(new Point(0,3)); add(new Point(4,3));
+            add(new Point(6,3)); add(new Point(12,3));
+            add(new Point(14,3)); add(new Point(20,3));
+            add(new Point(22,3)); add(new Point(26,3));
+            add(new Point(4,4)); add(new Point(5,4));
+            add(new Point(12,4)); add(new Point(14,4));
+            add(new Point(21,4)); add(new Point(22,4));
+            add(new Point(1,5)); add(new Point(2,5));
+            add(new Point(12,5)); add(new Point(14,5));
+            add(new Point(24,5)); add(new Point(25,5));
+            add(new Point(1,6)); add(new Point(2,6));
+            add(new Point(4,6)); add(new Point(5,6));
+            add(new Point(21,6)); add(new Point(22,6));
+            add(new Point(24,6)); add(new Point(25,6));
+            add(new Point(5,7)); add(new Point(21,7));
+        }};
+
+    private static ArrayList<Point> _ObjSchickenEngine   =
+        new ArrayList<Point>(){{
+            add(new Point(1,0)); add(new Point(4,0));
+            add(new Point(0,1)); add(new Point(0,2));
+            add(new Point(4,2)); add(new Point(0,3));
+            add(new Point(1,3)); add(new Point(2,3));
+            add(new Point(3,3)); add(new Point(13,3));
+            add(new Point(14,3)); add(new Point(6,4));
+            add(new Point(7,4)); add(new Point(8,4));
+            add(new Point(14,4)); add(new Point(15,4));
+            add(new Point(6,5)); add(new Point(7,5));
+            add(new Point(9,5)); add(new Point(10,5));
+            add(new Point(17,5)); add(new Point(18,5));
+            add(new Point(19,5)); add(new Point(6,6));
+            add(new Point(7,6)); add(new Point(8,6));
+            add(new Point(14,6)); add(new Point(15,6));
+            add(new Point(0,7)); add(new Point(1,7));
+            add(new Point(2,7)); add(new Point(3,7));
+            add(new Point(13,7)); add(new Point(14,7));
+            add(new Point(0,8)); add(new Point(4,8));
+            add(new Point(0,9)); add(new Point(1,10));
+            add(new Point(4,10));
+        }};
+
     public Game() {
         this(
             _DefSpaceWidth,
@@ -638,6 +731,66 @@ public class Game {
         Integer RotationAngle
     ) {
         this.addObject(X,Y,RotationAngle,_ObjHomeMade1);
+    }
+
+    public void addLoafer(
+        Integer X,
+        Integer Y
+    ) {
+        this.addLoafer(X,Y,_DefRotationAngle);
+    }
+
+    public void addLoafer(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjLoafer);
+    }
+
+    public void addSidecar(
+        Integer X,
+        Integer Y
+    ) {
+        this.addSidecar(X,Y,_DefRotationAngle);
+    }
+
+    public void addSidecar(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjSidecar);
+    }
+
+    public void addSpider(
+        Integer X,
+        Integer Y
+    ) {
+        this.addSpider(X,Y,_DefRotationAngle);
+    }
+
+    public void addSpider(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjSpider);
+    }
+
+    public void addSchickenEngine(
+        Integer X,
+        Integer Y
+    ) {
+        this.addSchickenEngine(X,Y,_DefRotationAngle);
+    }
+
+    public void addSchickenEngine(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjSchickenEngine);
     }
 
     public void initGliderFormation() {

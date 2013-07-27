@@ -26,6 +26,29 @@ public class Main {
         //g.initGosperGliderGun();
         g.initHomeMadeGeneration1();
 
+        //g.addBlock(10,10);
+        //g.addBeehive(10,10);
+        //g.addLoaf(10,10);
+        //g.addBoat(10,10);
+        //g.addBlinker(10,10);
+        //g.addToad(10,10);
+        //g.addBeacon(10,10);
+        //g.addPulsar(10,10);
+        //g.addGlider(10,10);
+        //g.addLWSS(10,10);
+        //g.addRpentomino(10,10);
+        //g.addDiehard(10,10);
+        //g.addAcorn(10,10);
+        //g.addGosperGliderGun(10,10);
+        //g.addBlockLayer1(10,10);
+        //g.addBlockLayer2(10,10);
+        //g.addBlockLayer3(10,10);
+        //g.addHomeMade1(10,10);
+        //g.addLoafer(10,10);
+        //g.addSidecar(10,10);
+        //g.addSpider(10,10);
+        //g.addSchickenEngine(10,10);
+
         while(g.hasLiveCells() && g.isEvolving()) {
             clearScreen();
             System.out.println("Generation: " + 
