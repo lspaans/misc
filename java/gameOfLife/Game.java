@@ -20,8 +20,8 @@ public class Game {
     private Boolean                     _Evolving           = Boolean.TRUE;
 
     private static Integer              _DefRotationAngle   = 0;
-    private static Integer              _DefSpaceWidth      = 50;
-    private static Integer              _DefSpaceHeight     = 50;
+    private static Integer              _DefSpaceWidth      = 60;
+    private static Integer              _DefSpaceHeight     = 40;
 
     // Still lifes
 
@@ -210,6 +210,14 @@ public class Game {
             add(new Point(36,0)); add(new Point(37,0));
         }};
 
+    private static ArrayList<Point> _ObjHomeMade1         =
+        new ArrayList<Point>(){{
+            add(new Point(0,0)); add(new Point(2,0));
+            add(new Point(0,1)); add(new Point(1,1));
+            add(new Point(2,1)); add(new Point(0,2));
+            add(new Point(1,2)); add(new Point(2,2));
+        }};
+
     public Game() {
         this(
             _DefSpaceWidth,
@@ -240,7 +248,7 @@ public class Game {
         );
     }
 
-    public void initGeneration(Integer Num) {
+    public void initRandomGeneration(Integer Num) {
         Integer Width           = _Space.getWidth();
         Integer Height          = _Space.getHeight();
         _NumLiveCells           = Num;
@@ -266,7 +274,7 @@ public class Game {
     ) {
         _Space          = new Space(Width,Height);
         if ( NumLiveCells > 0 ) {
-            this.initGeneration(NumLiveCells);
+            this.initRandomGeneration(NumLiveCells);
         }
     }
 
@@ -557,14 +565,14 @@ public class Game {
         this.addObject(X,Y,RotationAngle,_ObjAcorn);
     }
 
-    public void addGosperGlidingGun(
+    public void addGosperGliderGun(
         Integer X,
         Integer Y
     ) {
-        this.addGosperGlidingGun(X,Y,_DefRotationAngle);
+        this.addGosperGliderGun(X,Y,_DefRotationAngle);
     }
 
-    public void addGosperGlidingGun(
+    public void addGosperGliderGun(
         Integer X,
         Integer Y,
         Integer RotationAngle
@@ -615,5 +623,50 @@ public class Game {
         Integer RotationAngle
     ) {
         this.addObject(X,Y,RotationAngle,_ObjBlockLayer3);
+    }
+
+    public void addHomeMade1(
+        Integer X,
+        Integer Y
+    ) {
+        this.addHomeMade1(X,Y,_DefRotationAngle);
+    }
+
+    public void addHomeMade1(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjHomeMade1);
+    }
+
+    public void initGliderFormation() {
+        this.initGliderFormation(40,40);
+    }
+
+    public void initGliderFormation(Integer Width,Integer Height) {
+        _Space      = new Space(Width,Height);
+        this.addGlider(15,13,90);
+        this.addGlider(22,13,0);
+        this.addGlider(15,23,180);
+        this.addGlider(22,23,270);
+    }
+
+    public void initGosperGliderGun() {
+        this.initGosperGliderGun(120,25);
+    }
+
+    public void initGosperGliderGun(Integer Width,Integer Height) {
+        _Space      = new Space(Width,Height);
+        this.addGosperGliderGun(1,7);
+    }
+
+    public void initHomeMadeGeneration1() {
+        this.initHomeMadeGeneration1(53,46);
+    }
+
+    public void initHomeMadeGeneration1(Integer Width,Integer Height) {
+        _Space      = new Space(Width,Height);
+        this.addHomeMade1(25,22);
     }
 }

@@ -19,11 +19,12 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Game g                   = new Game(75,40);
-        g.addGlider(30,13,90);
-        g.addGlider(37,13,0);
-        g.addGlider(30,23,180);
-        g.addGlider(37,23,270);
+        Game g                   = new Game();
+
+        //g.initRandomGeneration(150);
+        //g.initGliderFormation();
+        //g.initGosperGliderGun();
+        g.initHomeMadeGeneration1();
 
         while(g.hasLiveCells() && g.isEvolving()) {
             clearScreen();
