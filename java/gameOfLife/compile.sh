@@ -19,28 +19,28 @@ then
 echo $(date '+%Y-%m-%d %H:%M:%S') ERROR: An error occurred while compiling Cell.java. Exiting!
 exit $?
 fi
-mv Cell.class ${PKGDIR}
+mv Cell*.class ${PKGDIR}
 javac -cp ${CLASSPATH} Space.java
 if [ ! $? -eq 0 ]
 then
 echo $(date '+%Y-%m-%d %H:%M:%S') ERROR: An error occurred while compiling Space.java. Exiting!
 exit $?
 fi
-mv Space.class ${PKGDIR}
+mv Space*.class ${PKGDIR}
 javac -cp ${CLASSPATH} Game.java
 if [ ! $? -eq 0 ]
 then
 echo $(date '+%Y-%m-%d %H:%M:%S') ERROR: An error occurred while compiling Game.java. Exiting!
 exit $?
 fi
-mv Game.class ${PKGDIR}
+mv Game*.class ${PKGDIR}
 javac -cp ${CLASSPATH} Main.java
 if [ ! $? -eq 0 ]
 then
 echo $(date '+%Y-%m-%d %H:%M:%S') ERROR: An error occurred while compiling Main.java. Exiting!
 exit $?
 fi
-mv Main.class ${PKGDIR}
+mv Main*.class ${PKGDIR}
 echo "Manifest-Version: 1.0" >${MFTFILE}
 echo "Created-By: 1.6.0 (Sun Microsystems Inc.)" >>${MFTFILE}
 echo "Main-Class: nl.gridpoint.test.gameoflife.Main" >>${MFTFILE}

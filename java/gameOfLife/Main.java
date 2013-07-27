@@ -20,21 +20,21 @@ public class Main {
     public static void main(String[] args) {
 
         Game g                   = new Game(75,40);
-//        g.initGeneration(100);
+        g.addGlider(30,13,90);
+        g.addGlider(37,13,0);
+        g.addGlider(30,23,180);
+        g.addGlider(37,23,270);
 
-        while(
-            g.hasLiveCells() &&
-            !g.isLooping()
-        ) {
+        while(g.hasLiveCells() && g.isEvolving()) {
             clearScreen();
             System.out.println("Generation: " + 
-                    "'" + g.getGeneration() + "', " +
-                    "[" + g.getMD5Space() + "]"
+                "'" + g.getGeneration() + "', " +
+                "[" + g.getMD5Space() + "]"
             );
-            g.displaySpace();
+            g.displayGeneration();
             g.nextGeneration();
             try {
-                Thread.sleep(5000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
             }
         }

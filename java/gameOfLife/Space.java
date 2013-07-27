@@ -175,15 +175,15 @@ public class Space {
     }
 
     public Space getClone() { 
-        Space Clone = new Space(_Width,_Height);
-        for(int y=0;y<_Height;y++) {
-            for(int x=0;x<_Width;x++) {
-                if (this.getCell(x,y).isAlive()) {
-                    Clone.getCell(x,y).doLive();
-                }
-            }
+        Space NewSpace = new Space(_Width,_Height);
+        Vector<Cell> OldCells       = this.getCells();
+        Vector<Cell> NewCells       = NewSpace.getCells();
+        Iterator<Cell> ItOldCells   = OldCells.iterator();
+        Iterator<Cell> ItNewCells   = NewCells.iterator();
+        while(ItOldCells.hasNext()) {
+            ItNewCells.next().setState(ItOldCells.next().getState());
         }
-        return(Clone);
+        return(NewSpace);
     }
 
     public void display() {

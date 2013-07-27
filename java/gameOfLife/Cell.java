@@ -27,4 +27,19 @@ public class Cell {
         _Alive  = Boolean.FALSE;
     }
 
+    public String getState() {
+        if (_Alive) {
+            return("alive");
+        } else {
+            return("dead");
+        }
+    }
+
+    public void setState(String State) {
+        if (State.equalsIgnoreCase("alive")) {
+            _Alive  = Boolean.TRUE;
+        } else {
+            _Alive  = Boolean.FALSE;
+        }
+    }
 }
