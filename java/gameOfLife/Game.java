@@ -104,7 +104,7 @@ public class Game {
             add(new Point(9,12)); add(new Point(10,12));
         }};
 
-    // SPaceships
+    // Spaceships
 
     private static ArrayList<Point> _ObjGlider              =
         new ArrayList<Point>(){{
@@ -121,6 +121,27 @@ public class Game {
             add(new Point(0,2)); add(new Point(1,2));
             add(new Point(3,2)); add(new Point(4,2));
             add(new Point(2,3)); add(new Point(3,3));
+        }};
+
+    private static ArrayList<Point> _ObjMWSS                =
+        new ArrayList<Point>(){{
+            add(new Point(3,0)); add(new Point(1,1));
+            add(new Point(5,1)); add(new Point(0,2));
+            add(new Point(0,3)); add(new Point(5,3));
+            add(new Point(0,4)); add(new Point(1,4));
+            add(new Point(2,4)); add(new Point(3,4));
+            add(new Point(4,4));
+        }};
+
+    private static ArrayList<Point> _ObjHWSS                =
+        new ArrayList<Point>(){{
+            add(new Point(3,0)); add(new Point(4,0));
+            add(new Point(1,1)); add(new Point(6,1));
+            add(new Point(0,2)); add(new Point(0,3));
+            add(new Point(6,3)); add(new Point(0,4));
+            add(new Point(1,4)); add(new Point(2,4));
+            add(new Point(3,4)); add(new Point(4,4));
+            add(new Point(5,4));
         }};
 
     // Methuselahs
@@ -309,6 +330,30 @@ public class Game {
             add(new Point(0,8)); add(new Point(4,8));
             add(new Point(0,9)); add(new Point(1,10));
             add(new Point(4,10));
+        }};
+
+    private static ArrayList<Point> _ObjOrion           =
+        new ArrayList<Point>(){{
+            add(new Point(3,0)); add(new Point(4,0));
+            add(new Point(3,1)); add(new Point(5,1));
+            add(new Point(3,2)); add(new Point(0,3));
+            add(new Point(1,3)); add(new Point(3,3));
+            add(new Point(0,4)); add(new Point(5,4));
+            add(new Point(0,5)); add(new Point(2,5));
+            add(new Point(3,5)); add(new Point(10,5));
+            add(new Point(11,5)); add(new Point(12,5));
+            add(new Point(5,6)); add(new Point(6,6));
+            add(new Point(7,6)); add(new Point(12,6));
+            add(new Point(13,6)); add(new Point(6,7));
+            add(new Point(7,7)); add(new Point(8,7));
+            add(new Point(10,7)); add(new Point(12,7));
+            add(new Point(13,8)); add(new Point(6,9));
+            add(new Point(8,9)); add(new Point(5,10));
+            add(new Point(6,10)); add(new Point(8,10));
+            add(new Point(6,11)); add(new Point(4,12));
+            add(new Point(5,12)); add(new Point(7,12));
+            add(new Point(7,13)); add(new Point(5,14));
+            add(new Point(6,14));
         }};
 
     public Game() {
@@ -613,6 +658,36 @@ public class Game {
         this.addObject(X,Y,RotationAngle,_ObjLWSS);
     }
 
+    public void addMWSS(
+        Integer X,
+        Integer Y
+    ) {
+        this.addMWSS(X,Y,_DefRotationAngle);
+    }
+
+    public void addMWSS(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjMWSS);
+    }
+
+    public void addHWSS(
+        Integer X,
+        Integer Y
+    ) {
+        this.addHWSS(X,Y,_DefRotationAngle);
+    }
+
+    public void addHWSS(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjHWSS);
+    }
+
     public void addRpentomino(
         Integer X,
         Integer Y
@@ -791,6 +866,21 @@ public class Game {
         Integer RotationAngle
     ) {
         this.addObject(X,Y,RotationAngle,_ObjSchickenEngine);
+    }
+
+    public void addOrion(
+        Integer X,
+        Integer Y
+    ) {
+        this.addOrion(X,Y,_DefRotationAngle);
+    }
+
+    public void addOrion(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjOrion);
     }
 
     public void initGliderFormation() {

@@ -36,6 +36,8 @@ public class Main {
         //g.addPulsar(10,10);
         //g.addGlider(10,10);
         //g.addLWSS(10,10);
+        //g.addMWSS(10,10);
+        //g.addHWSS(10,10);
         //g.addRpentomino(10,10);
         //g.addDiehard(10,10);
         //g.addAcorn(10,10);
@@ -48,6 +50,7 @@ public class Main {
         //g.addSidecar(10,10);
         //g.addSpider(10,10);
         //g.addSchickenEngine(10,10);
+        //g.addOrion(10,10);
 
         while(g.hasLiveCells() && g.isEvolving()) {
             clearScreen();
