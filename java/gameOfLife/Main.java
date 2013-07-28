@@ -24,7 +24,7 @@ public class Main {
         //g.initRandomGeneration(150);
         //g.initGliderFormation();
         //g.initGosperGliderGun();
-        g.initHomeMadeGeneration1();
+        //g.initHomeMadeGeneration1();
 
         //g.addBlock(10,10);
         //g.addBeehive(10,10);
@@ -34,10 +34,14 @@ public class Main {
         //g.addToad(10,10);
         //g.addBeacon(10,10);
         //g.addPulsar(10,10);
+        //g.add123(10,10);
+        //g.addStillater(10,10);
+        //g.addCuphook(10,10);
         //g.addGlider(10,10);
         //g.addLWSS(10,10);
         //g.addMWSS(10,10);
         //g.addHWSS(10,10);
+        g.addBackrake(10,10);
         //g.addRpentomino(10,10);
         //g.addDiehard(10,10);
         //g.addAcorn(10,10);
@@ -52,7 +56,8 @@ public class Main {
         //g.addSchickenEngine(10,10);
         //g.addOrion(10,10);
 
-        while(g.hasLiveCells() && g.isEvolving()) {
+        //while(g.hasLiveCells() && g.isEvolving()) {
+        while(g.hasLiveCells()) {
             clearScreen();
             System.out.println("Generation: " + 
                 "'" + g.getGeneration() + "', " +

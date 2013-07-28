@@ -104,6 +104,51 @@ public class Game {
             add(new Point(9,12)); add(new Point(10,12));
         }};
 
+    private static ArrayList<Point> _Obj123                 =
+        new ArrayList<Point>(){{
+            add(new Point(2,0)); add(new Point(3,0));
+            add(new Point(0,1)); add(new Point(3,1));
+            add(new Point(0,2)); add(new Point(1,2));
+            add(new Point(3,2)); add(new Point(5,2));
+            add(new Point(6,2)); add(new Point(1,3));
+            add(new Point(3,3)); add(new Point(6,3));
+            add(new Point(1,4)); add(new Point(6,4));
+            add(new Point(8,4)); add(new Point(9,4));
+            add(new Point(2,5)); add(new Point(3,5));
+            add(new Point(4,5)); add(new Point(6,5));
+            add(new Point(8,5)); add(new Point(9,5));
+            add(new Point(5,6)); add(new Point(4,7));
+            add(new Point(4,8)); add(new Point(5,8));
+	}};
+
+    private static ArrayList<Point> _ObjStillater           =
+        new ArrayList<Point>(){{
+            add(new Point(3,0)); add(new Point(2,1));
+            add(new Point(4,1)); add(new Point(6,1));
+            add(new Point(7,1)); add(new Point(2,2));
+            add(new Point(4,2)); add(new Point(5,2));
+            add(new Point(7,2)); add(new Point(0,3));
+            add(new Point(1,3)); add(new Point(1,4));
+            add(new Point(3,4)); add(new Point(5,4));
+            add(new Point(6,4)); add(new Point(1,5));
+            add(new Point(3,5)); add(new Point(6,5));
+            add(new Point(2,6)); add(new Point(5,6));
+            add(new Point(3,7)); add(new Point(4,7));
+	}};
+
+    private static ArrayList<Point> _ObjCuphook             =
+        new ArrayList<Point>(){{
+            add(new Point(4,0)); add(new Point(5,0));
+            add(new Point(0,1)); add(new Point(1,1));
+            add(new Point(3,1)); add(new Point(5,1));
+            add(new Point(0,2)); add(new Point(1,2));
+            add(new Point(3,2)); add(new Point(3,3));
+            add(new Point(3,4)); add(new Point(6,4));
+            add(new Point(4,5)); add(new Point(5,5));
+            add(new Point(7,5)); add(new Point(7,6));
+            add(new Point(7,7)); add(new Point(8,7));
+	}};
+
     // Spaceships
 
     private static ArrayList<Point> _ObjGlider              =
@@ -142,6 +187,56 @@ public class Game {
             add(new Point(1,4)); add(new Point(2,4));
             add(new Point(3,4)); add(new Point(4,4));
             add(new Point(5,4));
+        }};
+
+    // Puffers
+
+    private static ArrayList<Point> _ObjBackrake            =
+        new ArrayList<Point>(){{
+            add(new Point(5,0)); add(new Point(6,0));
+            add(new Point(7,0)); add(new Point(19,0));
+            add(new Point(20,0)); add(new Point(21,0));
+            add(new Point(4,1)); add(new Point(8,1));
+            add(new Point(18,1)); add(new Point(22,1));
+            add(new Point(3,2)); add(new Point(4,2));
+            add(new Point(9,2)); add(new Point(17,2));
+            add(new Point(22,2)); add(new Point(23,2));
+            add(new Point(2,3)); add(new Point(4,3));
+            add(new Point(6,3)); add(new Point(7,3));
+            add(new Point(9,3)); add(new Point(10,3));
+            add(new Point(16,3)); add(new Point(17,3));
+            add(new Point(19,3)); add(new Point(20,3));
+            add(new Point(22,3)); add(new Point(24,3));
+            add(new Point(1,4)); add(new Point(2,4));
+            add(new Point(4,4)); add(new Point(9,4));
+            add(new Point(11,4)); add(new Point(12,4));
+            add(new Point(14,4)); add(new Point(15,4));
+            add(new Point(17,4)); add(new Point(22,4));
+            add(new Point(24,4)); add(new Point(25,4));
+            add(new Point(0,5)); add(new Point(5,5));
+            add(new Point(9,5)); add(new Point(12,5));
+            add(new Point(14,5)); add(new Point(17,5));
+            add(new Point(21,5)); add(new Point(26,5));
+            add(new Point(12,6)); add(new Point(14,6));
+            add(new Point(0,7)); add(new Point(1,7));
+            add(new Point(9,7)); add(new Point(10,7));
+            add(new Point(12,7)); add(new Point(14,7));
+            add(new Point(16,7)); add(new Point(17,7));
+            add(new Point(25,7)); add(new Point(26,7));
+            add(new Point(12,8)); add(new Point(14,8));
+            add(new Point(6,9)); add(new Point(7,9));
+            add(new Point(8,9)); add(new Point(18,9));
+            add(new Point(19,9)); add(new Point(20,9));
+            add(new Point(6,10)); add(new Point(10,10));
+            add(new Point(20,10)); add(new Point(6,11));
+            add(new Point(8,11)); add(new Point(13,11));
+            add(new Point(14,11)); add(new Point(15,11));
+            add(new Point(12,12)); add(new Point(15,12));
+            add(new Point(20,12)); add(new Point(21,12));
+            add(new Point(15,13)); add(new Point(11,14));
+            add(new Point(15,14)); add(new Point(11,15));
+            add(new Point(15,15)); add(new Point(15,16));
+            add(new Point(12,17)); add(new Point(14,17));
         }};
 
     // Methuselahs
@@ -628,6 +723,50 @@ public class Game {
         this.addObject(X,Y,RotationAngle,_ObjPulsar);
     }
 
+    public void add123(
+        Integer X,
+        Integer Y
+    ) {
+        this.add123(X,Y,_DefRotationAngle);
+    }
+
+    public void add123(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_Obj123);
+    }
+
+    public void addStillater(
+        Integer X,
+        Integer Y
+    ) {
+        this.addStillater(X,Y,_DefRotationAngle);
+    }
+
+    public void addStillater(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjStillater);
+    }
+
+    public void addCuphook(
+        Integer X,
+        Integer Y
+    ) {
+        this.addCuphook(X,Y,_DefRotationAngle);
+    }
+
+    public void addCuphook(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjCuphook);
+    }
     public void addGlider(
         Integer X,
         Integer Y
@@ -688,6 +827,20 @@ public class Game {
         this.addObject(X,Y,RotationAngle,_ObjHWSS);
     }
 
+    public void addBackrake(
+        Integer X,
+        Integer Y
+    ) {
+        this.addBackrake(X,Y,_DefRotationAngle);
+    }
+
+    public void addBackrake(
+        Integer X,
+        Integer Y,
+        Integer RotationAngle
+    ) {
+        this.addObject(X,Y,RotationAngle,_ObjBackrake);
+    }
     public void addRpentomino(
         Integer X,
         Integer Y
