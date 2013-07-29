@@ -25,6 +25,7 @@ public class Main {
         //g.initGliderFormation();
         //g.initGosperGliderGun();
         //g.initHomeMadeGeneration1();
+        g.initBackrake();
 
         //g.addBlock(10,10);
         //g.addBeehive(10,10);
@@ -41,7 +42,7 @@ public class Main {
         //g.addLWSS(10,10);
         //g.addMWSS(10,10);
         //g.addHWSS(10,10);
-        g.addBackrake(10,10);
+        //g.addBackrake(10,10);
         //g.addRpentomino(10,10);
         //g.addDiehard(10,10);
         //g.addAcorn(10,10);

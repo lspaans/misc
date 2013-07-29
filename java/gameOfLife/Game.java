@@ -1065,4 +1065,13 @@ public class Game {
         _Space      = new Space(Width,Height);
         this.addHomeMade1(25,22);
     }
+
+    public void initBackrake() {
+        this.initBackrake(120,40);
+    }
+
+    public void initBackrake(Integer Width,Integer Height) {
+        _Space      = new Space(Width,Height);
+        this.addBackrake(40,5,270);
+    }
 }
