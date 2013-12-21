@@ -6,7 +6,8 @@ DEF_GRID_BASE = 3
 
 class Cell(object):
     def __init__(self, value=None, maxValue=DEF_GRID_BASE ** 2, options=[]):
-        self.setMaxValue(gridBase)
+        self.setMaxValue(maxValue)
+        self.setOptions(options)
         self.setValue(value)
 
     def clear(self):
@@ -22,13 +23,8 @@ class Cell(object):
     def getValue(self):
         return self.value
 
-    def unsetOption(self, option): 
-        if option in self.options:
-            self.options.remove(option)
-        elif not option in self.options:
-            raise Exception("Non-existing option")
-        else:
-            raise Exception("Invalid option")
+    def unsetOptions(self, options=[]):
+        self.options -= set(options)
 
     def setMaxValue(self, maxValue):
         self.maxValue = maxValue
@@ -47,8 +43,28 @@ class Cell(object):
             raise Exception("Invalid value")
 
 class Tile(object):
-    def __init__(self, gridBase=DEF_GRID_BASE):
-        pass
+    def __init__(self, values=[], maxCells=DEF_GRID_BASE ** 2):
+
+        self.cells = map(lambda n: Cell(), range(1, maxCells + 1))
+        self.maxCells = maxCells
+
+        if len(values) == 0:
+            pass
+        elif len(set(values)) == maxCells:
+            pass
+        else:
+            raise Exception("Invalid number of values")
+
+    def getCell(self, n):
+        if 0 < n <= len(self.cells):
+            return self.cells[n-1]
+        else:
+            raise Exception("Invalid cell number")
+
+    def getCells(self, l=None):
+        if l is None:
+            l = range(1, self.maxCells + 1)
+        return map(lambda n: self.getCell(n), l)
 
 class Board(object):
     def __init__(self, gridBase=DEF_GRID_BASE):
@@ -60,4 +76,8 @@ class Game(object):
 
 if __name__ == '__main__':
     os.system('clear')
+    t = Tile()
+    cells = t.getCells()
+    for c in cells:
+        print c.getOptions()
 
