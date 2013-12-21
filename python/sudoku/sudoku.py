@@ -5,9 +5,10 @@ import os
 DEF_GRID_BASE = 3
 
 class Cell(object):
-    def __init__(self, value=None, maxValue=DEF_GRID_BASE ** 2, options=[]):
-        self.maxValue = maxValue
-        self.allOptions = range(1, maxValue + 1)
+    def __init__(self, value=None, gridBase=DEF_GRID_BASE, options=[]):
+        self.__gridBase = gridBase
+        self.maxValue = self.__gridBase ** 2
+        self.allOptions = range(1, self.maxValue + 1)
         self.options = self.allOptions
         self.value = value
 
@@ -44,9 +45,13 @@ class Cell(object):
         else:
             raise ValueError("Invalid value")
 
+    def __str__(self):
+        return str(self.__value)
+
 class Tile(object):
-    def __init__(self, values=[], maxCells=DEF_GRID_BASE ** 2):
-        self.__maxCells = maxCells
+    def __init__(self, values=[], gridBase=DEF_GRID_BASE):
+        self.__gridBase = gridBase
+        self.__maxCells = self.__gridBase ** 2
         self.cells = values
 
     @property
@@ -61,11 +66,34 @@ class Tile(object):
         if len(set(values)) != self.__maxCells and set(values) != set([None]):
             raise ValueError("Non-unique or invalid number of values")
 
-        self.__cells = map(lambda v: Cell(v), values)
+        self.__cells = [Cell(v) for v in values]
+
+    def __str__(self):
+        out = ""
+        for n, c in enumerate(self.cells):
+            if n % self.__gridBase == 0 and n != 0:
+                out += "\n"
+            out += str(c.value)
+        return out
 
 class Board(object):
     def __init__(self, gridBase=DEF_GRID_BASE):
+        self.__gridBase = gridBase
+        self.__maxTiles = gridBase ** 2
+        self.__tiles = [Tile() for n in xrange(self.__maxTiles)]
+
+    @property
+    def tiles(self):
+        return self.__tiles
+
+    @property
+    def col(self, col):
         pass
+
+    @property
+    def row(self, row):
+        pass
+
 
 class Game(object):
     def __init__(self, gridBase=DEF_GRID_BASE):
@@ -73,6 +101,6 @@ class Game(object):
 
 if __name__ == '__main__':
     os.system('clear')
-    t = Tile()
-    for n, c in enumerate(t.cells,1):
-        print "Cell={0}, value={1}, options={2}".format(n, c.value, c.options)
+    b = Board()
+    print str(b.tiles[0])
+
