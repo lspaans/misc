@@ -152,4 +152,12 @@ class Parent(object):
 
 if __name__ == '__main__':
     p = Parent(NUMBER_OF_CHILDREN)
+
+    context = daemon.DaemonContext(
+        pidfile = "/tmp/daemon-test.pid",
+        signal_map = {
+            signal.SIGTERM: p.stop
+        }
+    )
+
     p.start()
