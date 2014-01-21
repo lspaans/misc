@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: UTF-8
 
+import daemon
 import os
 import signal
 import sys
@@ -21,14 +22,20 @@ class Child(object):
         self.fh = None
 
     def cleanup(self):
-        time_secs = os.getpid() % 10
+        time_secs = (os.getpid() % 10) + 1
+        time_now = time.time()
         self.fh.write(
-            "{0} [{1}] child: now cleaning up ({2}s)\n".format(
-                time.ctime(), os.getpid(), time_secs
+            "{0} [{1}] child: now cleaning up\n".format(
+                time.ctime(), os.getpid()
             )
         ) 
         # Do cool stuff here ...
         time.sleep(time_secs)
+        self.fh.write(
+            "{0} [{1}] child: finished cleaning up [t={2}s]\n".format(
+                time.ctime(), os.getpid(), int(time.time() - time_now)
+            )
+        ) 
 
     def start(self):
         self.has_started = True
@@ -57,7 +64,7 @@ class Child(object):
         ) 
         while self.exit_child is False:
             self.fh.write(
-                "{0} [{1}] child: Hopla\n".format(
+                "{0} [{1}] child: process is running\n".format(
                     time.ctime(), os.getpid()
                 )
             ) 
@@ -85,20 +92,26 @@ class Parent(object):
             if ret[0] != 0:
                 self.children.pop(n)
                 sys.stderr.write(
-                    "{0} [{1}] parent: child with pid='{2}' exited\n".format(
+                    "{0} [{1}] parent: child exited [pid={2}]\n".format(
                         time.ctime(), os.getpid(), c.pid
                     )
                 ) 
 
     def cleanup(self):
-        time_secs = os.getpid() % 10
+        time_secs = (os.getpid() % 10) + 1
+        time_now = time.time()
         sys.stderr.write(
-            "{0} [{1}] parent: now cleaning up ({2}s)\n".format(
-                time.ctime(), os.getpid(), time_secs
+            "{0} [{1}] parent: now cleaning up\n".format(
+                time.ctime(), os.getpid()
             )
         ) 
         # Do cool stuff here ...
         time.sleep(time_secs)
+        sys.stderr.write(
+            "{0} [{1}] parent: finished cleaning up [t={2}s]\n".format(
+                time.ctime(), os.getpid(), int(time.time() - time_now)
+            )
+        ) 
 
     def start(self):
         sys.stderr.write(
