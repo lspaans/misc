@@ -3,6 +3,7 @@
 
 import daemon
 import os
+import lockfile
 import signal
 import sys
 import time
@@ -126,7 +127,7 @@ class Parent(object):
             self.waitChildren()
             time.sleep(10)
         sys.stderr.write(
-            "{0} [{1}] parent: All children have exited\n".format(
+            "{0} [{1}] parent: all children have exited\n".format(
                 time.ctime(), os.getpid()
             )
         )
@@ -149,15 +150,28 @@ class Parent(object):
                 os.kill(c.pid, signal.SIGTERM)
         while len(self.children) > 0:
             self.waitChildren()
+            time.sleep(1)
 
 if __name__ == '__main__':
     p = Parent(NUMBER_OF_CHILDREN)
+    file_pid = "/tmp/daemon-test.pid"
+
+    if os.path.exists(file_pid + ".lock"):
+        sys.stderr.write(
+            "{0} [{1}] parent: pidfile already exists\n".format(
+                time.ctime(), os.getpid(), file_pid
+            )
+        )
+        exit(1)
 
     context = daemon.DaemonContext(
-        pidfile = "/tmp/daemon-test.pid",
+        pidfile = lockfile.FileLock(file_pid),
         signal_map = {
             signal.SIGTERM: p.stop
-        }
+        },
+        stdout = sys.stdout,
+        stderr = sys.stderr
     )
 
-    p.start()
+    with context:
+        p.start()
