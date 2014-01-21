@@ -6,6 +6,8 @@ import signal
 import sys
 import time
 
+NUMBER_OF_CHILDREN=3
+
 class Child(object):
     def __init__(self):
         self.exit_child = False
@@ -77,9 +79,9 @@ class Parent(object):
             c = Child()
             self.children.append(c)
 
-    def waitChildren(self,options=0):
+    def waitChildren(self):
         for n, c in enumerate(self.children):
-            ret = os.waitpid(c.pid, options)
+            ret = os.waitpid(c.pid, os.WNOHANG)
             if ret[0] != 0:
                 self.children.pop(n)
                 sys.stderr.write(
@@ -98,7 +100,7 @@ class Parent(object):
             if c.has_started is False:
                 c.start()
         while len(self.children) > 0:
-            self.waitChildren(os.WNOHANG)
+            self.waitChildren()
             time.sleep(10)
 
     def stop(self, signal_no, strack_frame):
@@ -111,7 +113,7 @@ class Parent(object):
             if c.has_started is True:
                 os.kill(c.pid, signal.SIGTERM)
         while len(self.children) > 0:
-            self.waitChildren(os.WNOHANG)
+            self.waitChildren()
         sys.stderr.write(
             "{0} [{1}] parent: All children have exited!\n".format(
                 time.ctime(), os.getpid()
@@ -126,5 +128,5 @@ class Parent(object):
 
 
 if __name__ == '__main__':
-    p = Parent(5)
+    p = Parent(NUMBER_OF_CHILDREN)
     p.start()
