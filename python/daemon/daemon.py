@@ -12,22 +12,22 @@ class Child(object):
     def __init__(self):
         self.exit_child = False
         self.has_started = False
-        self.fh = sys.stderr
-        self.file_out = "/tmp/hopla-{0}.out".format(os.getpid())
+        self.fh = None
 
     def openOutput(self):
-        self.fh = open(self.file_out, "a")
+        self.fh = sys.stderr
 
     def closeOutput(self):
-        self.fh.close()
+        self.fh = None
 
     def cleanup(self):
         time_secs = os.getpid() % 10
-        sys.stderr.write(
+        self.fh.write(
             "{0} [{1}] child: now cleaning up ({2}s)\n".format(
                 time.ctime(), os.getpid(), time_secs
             )
         ) 
+        # Do cool stuff here ...
         time.sleep(time_secs)
 
     def start(self):
@@ -42,33 +42,33 @@ class Child(object):
 
     def stop(self, signal_no, strack_frame):
         self.fh.write(
-            "{0} [{1}] child: stop initiated!\n".format(
+            "{0} [{1}] child: stop initiated\n".format(
                 time.ctime(), os.getpid()
             )
         ) 
         self.exit_child = True
 
     def main(self):
-#        self.openOutput()
-        sys.stderr.write(
+        self.openOutput()
+        self.fh.write(
             "{0} [{1}] child: started\n".format(
                 time.ctime(), os.getpid()
             )
         ) 
         while self.exit_child is False:
-            sys.stderr.write(
-                "{0} [{1}] child: Hopla!\n".format(
+            self.fh.write(
+                "{0} [{1}] child: Hopla\n".format(
                     time.ctime(), os.getpid()
                 )
             ) 
             time.sleep(60)
-#        self.closeOutput()
         self.cleanup()
-        sys.stderr.write(
-            "{0} [{1}] child: will exit now!\n".format(
+        self.fh.write(
+            "{0} [{1}] child: will exit now\n".format(
                 time.ctime(), os.getpid()
             )
         ) 
+        self.closeOutput()
         os._exit(0)
 
 class Parent(object):
@@ -85,10 +85,20 @@ class Parent(object):
             if ret[0] != 0:
                 self.children.pop(n)
                 sys.stderr.write(
-                    "{0} [{1}] parent: child with pid='{2}' exited!\n".format(
+                    "{0} [{1}] parent: child with pid='{2}' exited\n".format(
                         time.ctime(), os.getpid(), c.pid
                     )
                 ) 
+
+    def cleanup(self):
+        time_secs = os.getpid() % 10
+        sys.stderr.write(
+            "{0} [{1}] parent: now cleaning up ({2}s)\n".format(
+                time.ctime(), os.getpid(), time_secs
+            )
+        ) 
+        # Do cool stuff here ...
+        time.sleep(time_secs)
 
     def start(self):
         sys.stderr.write(
@@ -102,10 +112,22 @@ class Parent(object):
         while len(self.children) > 0:
             self.waitChildren()
             time.sleep(10)
+        sys.stderr.write(
+            "{0} [{1}] parent: All children have exited\n".format(
+                time.ctime(), os.getpid()
+            )
+        )
+        self.cleanup()
+        sys.stderr.write(
+            "{0} [{1}] parent: will exit now\n".format(
+                time.ctime(), os.getpid()
+            )
+        ) 
+        sys.exit(0)
 
     def stop(self, signal_no, strack_frame):
         sys.stderr.write(
-            "{0} [{1}] parent: stop initiated!\n".format(
+            "{0} [{1}] parent: stop initiated\n".format(
                 time.ctime(), os.getpid()
             )
         ) 
@@ -114,18 +136,6 @@ class Parent(object):
                 os.kill(c.pid, signal.SIGTERM)
         while len(self.children) > 0:
             self.waitChildren()
-        sys.stderr.write(
-            "{0} [{1}] parent: All children have exited!\n".format(
-                time.ctime(), os.getpid()
-            )
-        )
-        sys.stderr.write(
-            "{0} [{1}] parent: will exit now!\n".format(
-                time.ctime(), os.getpid()
-            )
-        ) 
-        sys.exit(0)
-
 
 if __name__ == '__main__':
     p = Parent(NUMBER_OF_CHILDREN)
