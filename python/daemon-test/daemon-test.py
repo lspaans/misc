@@ -3,7 +3,7 @@
 
 import daemon
 import os
-import lockfile
+import pidfile
 import signal
 import sys
 import time
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     p = Parent(NUMBER_OF_CHILDREN)
     file_pid = "/tmp/daemon-test.pid"
 
-    if os.path.exists(file_pid + ".lock"):
+    if os.path.exists(file_pid):
         sys.stderr.write(
             "{0} [{1}] parent: pidfile already exists\n".format(
                 time.ctime(), os.getpid(), file_pid
@@ -165,7 +165,8 @@ if __name__ == '__main__':
         exit(1)
 
     context = daemon.DaemonContext(
-        pidfile = lockfile.FileLock(file_pid),
+        pidfile = pidfile.PidFile(file_pid),
+        umask=0o077,
         signal_map = {
             signal.SIGTERM: p.stop
         },
