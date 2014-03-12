@@ -29,14 +29,14 @@ class Child(object):
             "{0} [{1}] child: now cleaning up\n".format(
                 time.ctime(), os.getpid()
             )
-        ) 
+        )
         # Do cool stuff here ...
         time.sleep(time_secs)
         self.fh.write(
             "{0} [{1}] child: finished cleaning up [t={2}s]\n".format(
                 time.ctime(), os.getpid(), int(time.time() - time_now)
             )
-        ) 
+        )
 
     def start(self):
         self.has_started = True
@@ -53,7 +53,7 @@ class Child(object):
             "{0} [{1}] child: stop initiated\n".format(
                 time.ctime(), os.getpid()
             )
-        ) 
+        )
         self.exit_child = True
 
     def main(self):
@@ -62,41 +62,56 @@ class Child(object):
             "{0} [{1}] child: started\n".format(
                 time.ctime(), os.getpid()
             )
-        ) 
+        )
         while self.exit_child is False:
             self.fh.write(
                 "{0} [{1}] child: process is running\n".format(
                     time.ctime(), os.getpid()
                 )
-            ) 
+            )
             time.sleep(60)
         self.cleanup()
         self.fh.write(
             "{0} [{1}] child: will exit now\n".format(
                 time.ctime(), os.getpid()
             )
-        ) 
+        )
         self.closeOutput()
         os._exit(0)
 
 class Parent(object):
     def __init__(self,n_children=1):
         signal.signal(signal.SIGTERM, self.stop)
+        signal.signal(signal.SIGCHLD, self.waitChildren)
         self.children = []
         for n in xrange(n_children):
             c = Child()
             self.children.append(c)
 
-    def waitChildren(self):
-        for n, c in enumerate(self.children):
-            ret = os.waitpid(c.pid, os.WNOHANG)
-            if ret[0] != 0:
-                self.children.pop(n)
+#    def waitChildren(self, signal_no, strack_frame):
+#        for n, c in enumerate(self.children):
+#            ret = os.waitpid(c.pid, os.WNOHANG)
+#            if ret[0] != 0:
+#                self.children.pop(n)
+#                sys.stderr.write(
+#                    "{0} [{1}] parent: child exited [pid={2}]\n".format(
+#                        time.ctime(), os.getpid(), c.pid
+#                    )
+#                )
+
+    def waitChildren(self, signal_no, strack_frame):
+        (pid, status) = os.waitpid(0, os.WNOHANG)
+        remaining_children = []
+        for c in self.children:
+            if c.pid != pid:
+                remaining_children.append(c)
+            else:
                 sys.stderr.write(
                     "{0} [{1}] parent: child exited [pid={2}]\n".format(
-                        time.ctime(), os.getpid(), c.pid
+                        time.ctime(), os.getpid(), pid
                     )
-                ) 
+                )
+        self.children = remaining_children
 
     def cleanup(self):
         time_secs = (os.getpid() % 10) + 1
@@ -105,27 +120,28 @@ class Parent(object):
             "{0} [{1}] parent: now cleaning up\n".format(
                 time.ctime(), os.getpid()
             )
-        ) 
+        )
         # Do cool stuff here ...
         time.sleep(time_secs)
         sys.stderr.write(
             "{0} [{1}] parent: finished cleaning up [t={2}s]\n".format(
                 time.ctime(), os.getpid(), int(time.time() - time_now)
             )
-        ) 
+        )
 
     def start(self):
         sys.stderr.write(
             "{0} [{1}] parent: started\n".format(
                 time.ctime(), os.getpid()
             )
-        ) 
+        )
         for c in self.children:
             if c.has_started is False:
                 c.start()
+
         while len(self.children) > 0:
-            self.waitChildren()
             time.sleep(10)
+
         sys.stderr.write(
             "{0} [{1}] parent: all children have exited\n".format(
                 time.ctime(), os.getpid()
@@ -136,7 +152,7 @@ class Parent(object):
             "{0} [{1}] parent: will exit now\n".format(
                 time.ctime(), os.getpid()
             )
-        ) 
+        )
         sys.exit(0)
 
     def stop(self, signal_no, strack_frame):
@@ -144,7 +160,7 @@ class Parent(object):
             "{0} [{1}] parent: stop initiated\n".format(
                 time.ctime(), os.getpid()
             )
-        ) 
+        )
         for c in self.children:
             if c.has_started is True:
                 os.kill(c.pid, signal.SIGTERM)
