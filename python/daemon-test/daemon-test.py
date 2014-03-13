@@ -43,18 +43,27 @@ class Child(object):
         pid = os.fork()
         if pid == 0:
             signal.signal(signal.SIGTERM, self.stop)
+            signal.signal(signal.SIGHUP, self.refresh)
             self.main()
             os._exit(0)
         else:
             self.pid = pid
 
-    def stop(self, signal_no, strack_frame):
+    def stop(self, signal_no=0, stack_frame=None):
         self.fh.write(
             "{0} [{1}] child: stop initiated\n".format(
                 time.ctime(), os.getpid()
             )
         )
         self.exit_child = True
+
+    def refresh(self, signal_no=0, stack_frame=None):
+        self.config = {}
+        sys.stderr.write(
+            "{0} [{1}] child: config refresh\n".format(
+                time.ctime(), os.getpid()
+            )
+        )
 
     def main(self):
         self.openOutput()
@@ -82,35 +91,26 @@ class Child(object):
 class Parent(object):
     def __init__(self,n_children=1):
         signal.signal(signal.SIGTERM, self.stop)
+        signal.signal(signal.SIGHUP, self.refresh)
         signal.signal(signal.SIGCHLD, self.waitChildren)
         self.children = []
         for n in xrange(n_children):
             c = Child()
             self.children.append(c)
 
-#    def waitChildren(self, signal_no, strack_frame):
-#        for n, c in enumerate(self.children):
-#            ret = os.waitpid(c.pid, os.WNOHANG)
-#            if ret[0] != 0:
-#                self.children.pop(n)
-#                sys.stderr.write(
-#                    "{0} [{1}] parent: child exited [pid={2}]\n".format(
-#                        time.ctime(), os.getpid(), c.pid
-#                    )
-#                )
-
-    def waitChildren(self, signal_no, strack_frame):
-        (pid, status) = os.waitpid(0, os.WNOHANG)
+    def waitChildren(self, signal_no=0, stack_frame=None):
         remaining_children = []
-        for c in self.children:
-            if c.pid != pid:
-                remaining_children.append(c)
-            else:
-                sys.stderr.write(
-                    "{0} [{1}] parent: child exited [pid={2}]\n".format(
-                        time.ctime(), os.getpid(), pid
+        if len(self.children) > 0:
+            (pid, status) = os.waitpid(0, os.WNOHANG)
+            for c in self.children:
+                if c.pid != pid:
+                    remaining_children.append(c)
+                else:
+                    sys.stderr.write(
+                        "{0} [{1}] parent: child exited [pid={2}]\n".format(
+                            time.ctime(), os.getpid(), pid
+                        )
                     )
-                )
         self.children = remaining_children
 
     def cleanup(self):
@@ -155,7 +155,7 @@ class Parent(object):
         )
         sys.exit(0)
 
-    def stop(self, signal_no, strack_frame):
+    def stop(self, signal_no=0, stack_frame=None):
         sys.stderr.write(
             "{0} [{1}] parent: stop initiated\n".format(
                 time.ctime(), os.getpid()
@@ -167,6 +167,17 @@ class Parent(object):
         while len(self.children) > 0:
             self.waitChildren()
             time.sleep(1)
+
+    def refresh(self, signal_no=0, stack_frame=None):
+        self.config = {}
+        sys.stderr.write(
+            "{0} [{1}] parent: config refresh\n".format(
+                time.ctime(), os.getpid()
+            )
+        )
+        for c in self.children:
+            if c.has_started is True:
+                os.kill(c.pid, signal.SIGHUP)
 
 if __name__ == '__main__':
     p = Parent(NUMBER_OF_CHILDREN)
