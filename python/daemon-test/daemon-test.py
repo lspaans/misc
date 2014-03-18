@@ -4,9 +4,14 @@
 import daemon
 import os
 import pidfile
+import re
+import select
 import signal
 import sys
 import time
+
+# HIERMEE VERDER!!!!
+# http://docs.python.org/2/library/multiprocessing.html
 
 NUMBER_OF_CHILDREN=3
 
@@ -31,7 +36,7 @@ class Child(object):
             )
         )
         # Do cool stuff here ...
-        time.sleep(time_secs)
+        #time.sleep(time_secs)
         self.fh.write(
             "{0} [{1}] child: finished cleaning up [t={2}s]\n".format(
                 time.ctime(), os.getpid(), int(time.time() - time_now)
@@ -41,13 +46,20 @@ class Child(object):
     def start(self):
         self.has_started = True
         pid = os.fork()
+        r, w = os.pipe()
         if pid == 0:
             signal.signal(signal.SIGTERM, self.stop)
             signal.signal(signal.SIGHUP, self.refresh)
+            signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+            self.pid = os.getpid()
+            os.close(r)
+            self.fd = os.fdopen(w, "w", 0)
             self.main()
             os._exit(0)
         else:
             self.pid = pid
+            os.close(w)
+            self.fd = os.fdopen(r)
 
     def stop(self, signal_no=0, stack_frame=None):
         self.fh.write(
@@ -55,6 +67,7 @@ class Child(object):
                 time.ctime(), os.getpid()
             )
         )
+        self.fd.write("{0}\n".format(self.pid))
         self.exit_child = True
 
     def refresh(self, signal_no=0, stack_frame=None):
@@ -78,7 +91,12 @@ class Child(object):
                     time.ctime(), os.getpid()
                 )
             )
-            time.sleep(60)
+#            self.fd.write(
+#                "{0} pipe data (pid='{1}')\n".format(
+#                    time.ctime(), os.getpid()
+#                )
+#            )
+            time.sleep(10)
         self.cleanup()
         self.fh.write(
             "{0} [{1}] child: will exit now\n".format(
@@ -90,27 +108,67 @@ class Child(object):
 
 class Parent(object):
     def __init__(self,n_children=1):
+        self.exit_parent = False
+        self.exit_child = False
         signal.signal(signal.SIGTERM, self.stop)
         signal.signal(signal.SIGHUP, self.refresh)
-        signal.signal(signal.SIGCHLD, self.waitChildren)
+        signal.signal(signal.SIGCHLD, self.set_child_exit_flag)
         self.children = []
+
         for n in xrange(n_children):
             c = Child()
             self.children.append(c)
 
-    def waitChildren(self, signal_no=0, stack_frame=None):
+    def set_child_exit_flag(self, signal_no=0, stack_frame=None):
+        sys.stderr.write(
+            "{0} [{1}] parent: child exit detected\n".format(
+                time.ctime(), os.getpid()
+            )
+        )
+        self.exit_child = True
+
+    def process_child_exit(self):
+        self.exit_child = False
         remaining_children = []
-        if len(self.children) > 0:
-            (pid, status) = os.waitpid(0, os.WNOHANG)
-            for c in self.children:
-                if c.pid != pid:
-                    remaining_children.append(c)
-                else:
-                    sys.stderr.write(
-                        "{0} [{1}] parent: child exited [pid={2}]\n".format(
-                            time.ctime(), os.getpid(), pid
-                        )
+        pids_exit = []
+        re_pid = re.compile('^\d+$')
+        fds = map(lambda c: c.fd, self.children)
+        sys.stderr.write(
+            "{0} [{1}] parent: processing child exit(s)\n".format(
+                time.ctime(), os.getpid()
+            )
+        )
+
+        # poll() schijnt efficienter te zijn
+        fds_r, fds_w, fds_x = select.select(fds, [], [])
+        for fd in fds_r:
+            pid_read = fd.readline()
+
+            sys.stderr.write(
+                    "{0} [{1}] PRE: parent: read from child: '{2}'\n".format(
+                    time.ctime(), os.getpid(), pid_read
+                )
+            )
+
+            if not re_pid.match(pid_read):
+                continue
+
+            sys.stderr.write(
+                "{0} [{1}] parent: read from child: '{2}'\n".format(
+                    time.ctime(), os.getpid(), pid_read
+                )
+            )
+            (pid_wait, status) = os.waitpid(pid_read, os.WNOHANG)
+            if pid_wait:
+                sys.stderr.write(
+                    "{0} [{1}] parent: processing child exit ({2})\n".format(
+                        time.ctime(), os.getpid(), pid_wait
                     )
+                )
+                pids_exit.append(pid_wait)
+        for c in self.children:
+            if not c.pid in pids_exit:
+                remaining_children.append(c)
         self.children = remaining_children
 
     def cleanup(self):
@@ -139,8 +197,29 @@ class Parent(object):
             if c.has_started is False:
                 c.start()
 
-        while len(self.children) > 0:
+        while (
+            len(self.children) > 0 and
+            not self.exit_parent
+        ):
+            sys.stderr.write(
+                (
+                    "{0} [{1}] parent: process is running " +
+                    "(children={2})\n"
+                ).format(
+                    time.ctime(), os.getpid(), len(self.children)
+                )
+            )
+            if self.exit_child:
+                self.process_child_exit()
             time.sleep(10)
+
+        if self.exit_parent:
+            for c in self.children:
+                if c.has_started is True:
+                    os.kill(c.pid, signal.SIGTERM)
+
+        while len(self.children) > 0:
+            time.sleep(1)
 
         sys.stderr.write(
             "{0} [{1}] parent: all children have exited\n".format(
@@ -161,12 +240,7 @@ class Parent(object):
                 time.ctime(), os.getpid()
             )
         )
-        for c in self.children:
-            if c.has_started is True:
-                os.kill(c.pid, signal.SIGTERM)
-        while len(self.children) > 0:
-            self.waitChildren()
-            time.sleep(1)
+        self.exit_parent = True
 
     def refresh(self, signal_no=0, stack_frame=None):
         self.config = {}
@@ -197,6 +271,7 @@ if __name__ == '__main__':
         signal_map = {
             signal.SIGTERM: p.stop
         },
+        detach_process = False,
         stdout = sys.stdout,
         stderr = sys.stderr
     )
