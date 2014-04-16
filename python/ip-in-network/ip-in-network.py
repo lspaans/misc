@@ -7,13 +7,13 @@ def ip_in_network(mask, address):
 
     mask_address, mask_bits = mask.split("/",1)
     bit_val     = 2 ** 31
+    mask_bits   = int(mask_bits)
     mask_val    = 0
 
-    for n in xrange(int(mask_bits)):
-        if bit_val < 1:
-            break
+    while bit_val and mask_bits:
         mask_val += bit_val
-        bit_val /= 2
+        bit_val >>= 1
+        mask_bits -= 1
 
     mask_map    = socket.inet_ntoa(
         struct.pack(
