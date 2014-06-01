@@ -3,14 +3,12 @@
 import random
 
 class Coin(object):
-    def __init__(self, chanceHeads=1, chanceTails=1):
-        self.chanceHeads, self.chanceTails = chanceHeads, chanceTails
+    def __init__(self, chanceHeads=0.5):
+        self.chanceHeads = chanceHeads
         self.toss()
 
     def toss(self):
-        self.headsUp = random.randrange(
-            self.chanceHeads + self.chanceTails
-        ) < self.chanceHeads
+        self.headsUp = random.random() < self.chanceHeads
 
     def heads(self):
         return self.headsUp
