@@ -4,7 +4,7 @@ import random
 
 class Coin(object):
     def __init__(self, chanceHeads=0.5):
-        self.chanceHeads = chanceHeads
+        self.setChanceHeads(chanceHeads)
         self.toss()
 
     def toss(self):
@@ -16,23 +16,28 @@ class Coin(object):
     def tails(self):
         return not self.headsUp
 
+    def setChanceHeads(self, chanceHeads):
+        self.chanceHeads = chanceHeads
+
     def __str__(self):
         return("heads" if self.heads() else "tails")
 
 class Match(object):
-    def __init__(self, parties):
+    def __init__(self, parties, chanceHeads=0.5):
         self.score = {p: 0 for p in parties}
+        self.chanceHeads = chanceHeads
         self._predictScore()
 
     def _predictScore(self):
-        for v in xrange(self._getNumberOfHeads()):
-            self.score[random.choice(self.score.keys())] += 1
+        for p in self.score:
+            self.score[p] = self._getNumberOfHeads()
 
     def _getNumberOfHeads(self):
-        c = Coin()
+        c = Coin(self.chanceHeads)
         tosses = 0
         while c.heads():
             tosses += 1
+            c.setChanceHeads(1.0/(tosses+2))
             c.toss()
         return(tosses)
 
