@@ -2,6 +2,7 @@
 # encoding: UTF-8
 
 import daemon
+#import daemon.pidlockfile
 import os
 import multiprocessing
 import pidfile
@@ -19,6 +20,7 @@ class Child(object):
         self.do_exit = False
         self.do_refresh = False
         self.has_started = False
+        self.parent_exit = False
         self.fh = None
 
     def open_output(self):
@@ -27,6 +29,10 @@ class Child(object):
     def close_output(self):
         self.fh = None
 
+    def init_signals(self):
+        signal.signal(signal.SIGTERM, self.init_exit)
+        signal.signal(signal.SIGHUP, self.init_refresh) 
+
     def init_exit(self, signal_no=0, stack_frame=None):
         self.fh.write(
             "{0} [{1}] child: exit initiated\n".format(
@@ -34,17 +40,20 @@ class Child(object):
         ))
         self.do_exit = True
 
-    def init_signals(self):
-        signal.signal(signal.SIGTERM, self.init_exit)                       
-        signal.signal(signal.SIGHUP, self.init_refresh) 
-
     def perform_exit(self):
         self.fh.write(
             "{0} [{1}] child: performing exit\n".format(
                 time.ctime(), self.pid
         ))
-        self.pipe.send('exit')
+        self.send('exit')
         self.cleanup()
+
+    def init_parent_exit(self):
+        self.fh.write(
+            "{0} [{1}] child: parent died (ppid={2})\n".format(
+                time.ctime(), self.pid, self.pid_parent
+        ))
+        self.parent_exit = True
 
     def init_refresh(self, signal_no=0, stack_frame=None):
         sys.stderr.write(
@@ -59,7 +68,7 @@ class Child(object):
             "{0} [{1}] child: performing refresh\n".format(
                 time.ctime(), self.pid
         ))
-        self.pipe.send('refresh')
+        self.send('refresh')
         self.config = {}
 
     def cleanup(self):
@@ -72,9 +81,20 @@ class Child(object):
         # Do cool stuff here ...
         #time.sleep(time_secs)
         self.fh.write(
-            "{0} [{1}] child: finished cleanup [t={2}s]\n".format(
+            "{0} [{1}] child: finished cleanup (t={2}s)\n".format(
                 time.ctime(), self.pid, int(time.time() - time_now)
         ))
+
+    def parent_alive(self):
+        if os.getppid() == self.pid_parent:
+            return(True)
+        else:
+            self.init_parent_exit()
+            return(False)
+
+    def send(self, message):
+        if self.parent_alive():
+            self.pipe.send(message)
 
     def process_input(self):
         if not self.pipe.poll():
@@ -102,13 +122,14 @@ class Child(object):
         if pid == 0:
             self.init_signals()
             self.pid = os.getpid()
+            self.pid_parent = os.getppid()
             self.pipe = pipe_child
             self.open_output()
             try:
                 self.main()
             except Exception as e:
                 self.fh.write(
-                    "{0} [{1}] child: exit details ('{2}')\n".format(
+                    "{0} [{1}] child: exit details ({2})\n".format(
                         time.ctime(), self.pid, repr(e)
                 ))
             finally:
@@ -154,7 +175,6 @@ class Parent(object):
         self.do_refresh = False
         self.child_exited = False
         self.children = []
-        self.pid = os.getpid()
 
         self.init_children(number_of_children)
 
@@ -166,13 +186,16 @@ class Parent(object):
     def init_exit(self, signal_no=0, stack_frame=None):
         sys.stderr.write(
             "{0} [{1}] parent: exit initiated\n".format(
-                time.ctime(), self.pid
+                time.ctime(), self.get_pid()
         ))
         self.do_exit = True
 
     def init_children(self, number_of_children=DEF_NUMBER_OF_CHILDREN):
         for n in xrange(number_of_children):
             self.children.append(Child())
+
+    def get_pid(self):\
+        return(os.getpid())
 
     def start_children(self):
         for child in self.children:
@@ -182,7 +205,7 @@ class Parent(object):
     def perform_exit(self):
         sys.stderr.write(
             "{0} [{1}] parent: performing exit\n".format(
-                time.ctime(), self.pid
+                time.ctime(), self.get_pid()
         ))
         for child in self.children:
             if not child.has_started:
@@ -193,7 +216,7 @@ class Parent(object):
     def init_refresh(self, signal_no=0, stack_frame=None):
         sys.stderr.write(
             "{0} [{1}] parent: refresh initiated\n".format(
-                time.ctime(), self.pid
+                time.ctime(), self.get_pid()
         ))
         self.do_refresh = True
 
@@ -201,7 +224,7 @@ class Parent(object):
         self.do_refresh = False
         sys.stderr.write(
             "{0} [{1}] parent: performing refresh\n".format(
-                time.ctime(), self.pid
+                time.ctime(), self.get_pid()
         ))
         for child in self.children:
             if not child.has_started:
@@ -212,94 +235,62 @@ class Parent(object):
     def catch_child_exit(self, signal_no=0, stack_frame=None):
         sys.stderr.write(
             "{0} [{1}] parent: child exit detected\n".format(
-                time.ctime(), self.pid
+                time.ctime(), self.get_pid()
         ))
         self.child_exited = True
 
     def process_child_refresh(self, child):
         sys.stderr.write(
-            "{0} [{1}] parent: child refresh detected ({2})\n".format(
-                time.ctime(), self.pid, child.pid
+            "{0} [{1}] parent: child refresh detected (cpid={2})\n".format(
+                time.ctime(), self.get_pid(), child.pid
         ))
 
-    def process_child_exit(self, child_in=None):
-        self.child_exited = False
-        remaining_children = []
-        children = []
-        pids_exit = []
+    def remove_child(self, child):
         sys.stderr.write(
-            "{0} [{1}] parent: processing child exit(s)\n".format(
-                time.ctime(), self.pid
+            "{0} [{1}] parent: processing child exit (cpid={2})\n".format(
+                time.ctime(), self.get_pid(), child.pid
+        ))
+        self.children = filter(lambda c: child.pid != c.pid, self.children)
+        sys.stderr.write(
+            "{0} [{1}] parent: removed exited child (cpid={2})\n".format(
+                time.ctime(), self.get_pid(), child.pid
         ))
 
-        if child_in is None:
-            sys.stderr.write("HOPLA!\n")
-            children = self.children
-        else:
-            sys.stderr.write("WOEI!\n")
-            children = [child_in,]
-
-        for child in children:
-            sys.stderr.write(
-                "{0} [{1}] parent: determining child status ({2})\n".format(
-                    time.ctime(), self.pid, child.pid
-            ))
-
-            if child.pipe.closed:
-                pid_exit.append(child.pid)
-                continue
-                
-            if not child.pipe.poll():
-                continue
-
-            try:
-                message = (
-                    "{0} [{1}] PRE: parent: child did not exit properly: " + 
-                    "'{2}'\n"
-                ).format(
-                    time.ctime(), self.pid, child.pid
-                )
-                data_read = child.pipe.recv().rstrip()
-                sys.stderr.write(
-                    "{0} [{1}] PRE: parent: read from child: '{2}'\n".format(
-                        time.ctime(), self.pid, repr(data_read)
-                ))
-            except EOFError:
-                sys.stderr.write(message)
-                pids_exit.append(child.pid)
-                continue
-
-            if not instanceof(data_read, int):
-                continue
-
-# HIER MOET DE BEVESTIGING WORDEN TERUGGESTUURD NAAR DE CHILD
-
-            (pid_wait, status) = os.waitpid(data_read, os.WNOHANG)
-            if pid_wait:
-                sys.stderr.write(
-                    "{0} [{1}] parent: processing child exit ({2})\n".format(
-                        time.ctime(), self.pid, pid_wait
-                ))
-                pids_exit.append(pid_wait)
-
+    def process_children_exit(self):
+        sys.stderr.write(
+            "{0} [{1}] parent: processing child exits\n".format(
+                time.ctime(), self.get_pid()
+        ))
         for child in self.children:
-            if not child.pid in pids_exit:
-                remaining_children.append(child)
+            self.process_child_exit(child)
 
-        self.children = remaining_children
+    def process_child_exit(self, child):
+        self.child_exited = False
+
+        sys.stderr.write(
+            "{0} [{1}] parent: determining child status (cpid={2})\n".format(
+                time.ctime(), self.get_pid(), child.pid
+        ))
+
+        if child.pipe.closed:
+            self.remove_child(child)
+        else:
+            (pid_wait, status) = os.waitpid(child.pid, os.WNOHANG)
+            if pid_wait:
+                self.remove_child(child)
 
     def cleanup(self):
-        time_secs = (self.pid % 10) + 1
+        time_secs = (self.get_pid() % 10) + 1
         time_now = time.time()
         sys.stderr.write(
             "{0} [{1}] parent: performing cleanup\n".format(
-                time.ctime(), self.pid
+                time.ctime(), self.get_pid()
         ))
         # Do cool stuff here ...
         time.sleep(time_secs)
         sys.stderr.write(
-            "{0} [{1}] parent: finished cleanup [t={2}s]\n".format(
-                time.ctime(), self.pid, int(time.time() - time_now)
+            "{0} [{1}] parent: finished cleanup (t={2}s)\n".format(
+                time.ctime(), self.get_pid(), int(time.time() - time_now)
         ))
 
     def process_input(self):
@@ -307,6 +298,8 @@ class Parent(object):
             self.process_child_input(child)
 
     def process_child_input(self, child):
+        if child.pipe.closed:
+            self.process_child_exit(child)
         if not child.pipe.poll():
             return
         try:
@@ -317,16 +310,17 @@ class Parent(object):
                 self.process_child_exit(child)
         except EOFError:
             message = (
-                "{0} [{1}] parent: error receiving data from child '{2}\n"
+                "{0} [{1}] parent: error receiving data from child " + 
+                "(cpid={2})\n"
             ).format(
-                time.ctime(), self.pid, child.pid
+                time.ctime(), self.get_pid(), child.pid
             )
         return
 
     def start(self):
         sys.stderr.write(
             "{0} [{1}] parent: started\n".format(
-                time.ctime(), self.pid
+                time.ctime(), self.get_pid()
         ))
         self.start_children()
         self.main()
@@ -337,18 +331,18 @@ class Parent(object):
             len(self.children) > 0 and
             not self.do_exit
         ):
-            if not int(time.time() + self.pid) % 10:
+            if not int(time.time() + self.get_pid()) % 10:
                 sys.stderr.write((
                     "{0} [{1}] parent: process is running " +
                     "(children={2})\n"
                 ).format(
-                    time.ctime(), self.pid, len(self.children)
+                    time.ctime(), self.get_pid(), len(self.children)
                 ))
 
             self.process_input()
 
             if self.child_exited:
-                self.process_child_exit()
+                self.process_children_exit()
 
             if self.do_refresh:
                 self.perform_refresh()
@@ -359,29 +353,27 @@ class Parent(object):
             self.perform_exit()
 
         while len(self.children) > 0:
+            sys.stderr.write(
+                "{0} [{1}] parent: waiting for children to exit\n".format(
+                    time.ctime(), self.get_pid()
+            ))
+            self.process_children_exit()
             time.sleep(1)
 
         sys.stderr.write(
             "{0} [{1}] parent: all children have exited\n".format(
-                time.ctime(), self.pid
+                time.ctime(), self.get_pid()
         ))
         sys.stderr.write(
             "{0} [{1}] parent: will exit now\n".format(
-                time.ctime(), self.pid
+                time.ctime(), self.get_pid()
         ))
         sys.exit(0)
 
-def get_validated_file(file_name):
-    if not os.path.exists(file_name):
-        return(file_name)
-    raise ValueError(
-        "{0} [{1}] parent: file '{2}' already exists\n".format(
-            time.ctime(), os.getpid(), file_name
-        ))
 
 def get_context(parent, file_pid=DEF_FILE_PID):
     return(daemon.DaemonContext(
-        pidfile = pidfile.PidFile(get_validated_file(file_pid)),
+        pidfile = pidfile.PidFile(file_pid),
         umask = 0o077,
         signal_map = {
             signal.SIGTERM: parent.init_exit
