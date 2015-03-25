@@ -2,12 +2,10 @@
 # encoding: UTF-8
 
 import daemon
-#import daemon.pidlockfile
 import os
 import multiprocessing
 import pidfile
 import re
-import select
 import signal
 import sys
 import time
@@ -45,8 +43,8 @@ class Child(object):
             "{0} [{1}] child: performing exit\n".format(
                 time.ctime(), self.pid
         ))
-        self.send('exit')
         self.cleanup()
+        self.send('exit')
 
     def init_parent_exit(self):
         self.fh.write(
@@ -78,8 +76,7 @@ class Child(object):
             "{0} [{1}] child: performing cleanup\n".format(
                 time.ctime(), self.pid
         ))
-        # Do cool stuff here ...
-        #time.sleep(time_secs)
+        time.sleep(time_secs)
         self.fh.write(
             "{0} [{1}] child: finished cleanup (t={2}s)\n".format(
                 time.ctime(), self.pid, int(time.time() - time_now)
