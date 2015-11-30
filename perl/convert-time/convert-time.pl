@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 use POSIX;
+use Time::Local qw( timelocal_nocheck );
 
 our $FORMAT_DATE_TIME_INPUT = '%Y%m%d%H%M%S';
 our $FORMAT_DATE_TIME_OUTPUT = '%s';
@@ -36,6 +37,12 @@ sub get_converted_date_time_stamp(@) {
         }
         $time{$time_indicator} = $value
     }
+
+    # Dirty solution for circumventing a Solaris-bug that causes '%s' not to
+    # be interpolated when using POSIX::strftime
+    $format_date_time_output =~ s/%s/timelocal_nocheck(
+        map $time{$_}, qw(S M H d m Y)
+    )/ge;
 
     return(strftime(
         $format_date_time_output,
