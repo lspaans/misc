@@ -1,0 +1,35 @@
+:toc:
+:homepage: https://github.com/lspaans/misc/
+
+= Convert Time
+
+== Description
+
+This script can be used to convert date/time-stamps when you--for whatever
+reason--cannot using modules like Time::Piece.
+
+== Usage
+
+The script takes 3 optional arguments:
+
+* A date/time-stamp (default: current time in '%Y%m%d%H%M%S'-format)
+* An input-format (default: '%Y%m%d%H%M%S')
+* An output-format (default: '%s', i.e. seconds since the epoch)
+
+== Warning
+
+Currently only '%Y', '%m'. '%d', '%H', '%M' and '%S' are supported.
+
+== Examples
+
+----
+$ ./convert-time.pl
+1448035245
+$ ./convert-time.pl 20151117044800
+1447732080
+$ ./convert-time.pl "2015-11-17 04:48:00" "%Y-%m-%d %H:%M:%S"
+1447732080
+$ ./convert-time.pl 20151117044800 "%Y%m%d%H%M%S" "%H:%M:%S %d/%m/%Y"
+04:48:00 17/11/2015
+$
+----
